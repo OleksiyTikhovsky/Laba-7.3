@@ -1,0 +1,158 @@
+#include <iostream>
+#include <iomanip>
+#include <climits>
+#include <ctime>
+
+using namespace std;
+
+void PrintRow(int** a, const int rowNo, const int colCount, int colNo)
+{
+    cout << setw(4) << a[rowNo][colNo];
+    if (colNo < colCount - 1)
+        PrintRow(a, rowNo, colCount, colNo + 1);
+    else
+        cout << endl;
+}
+
+void PrintRows(int** a, const int rowCount, const int colCount, int rowNo)
+{
+    PrintRow(a, rowNo, colCount, 0);
+    if (rowNo < rowCount - 1)
+        PrintRows(a, rowCount, colCount, rowNo + 1);
+    else
+        cout << endl;
+}
+
+void InputRow(int** a, const int rowNo, const int colCount, int colNo)
+{
+    cout << "a[" << rowNo << "][" << colNo << "] = ";
+    cin >> a[rowNo][colNo];
+    if (colNo < colCount - 1)
+        InputRow(a, rowNo, colCount, colNo + 1);
+    else
+        cout << endl;
+}
+
+void InputRows(int** a, const int rowCount, const int colCount, int rowNo)
+{
+    InputRow(a, rowNo, colCount, 0);
+    if (rowNo < rowCount - 1)
+        InputRows(a, rowCount, colCount, rowNo + 1);
+    else
+        cout << endl;
+}
+
+void CreateRow(int** a, const int rowNo, const int colCount, const int Low, const int High, int colNo)
+{
+    a[rowNo][colNo] = Low + rand() % (High - Low + 1);
+    if (colNo < colCount - 1)
+        CreateRow(a, rowNo, colCount, Low, High, colNo + 1);
+}
+
+void CreateRows(int** a, const int rowCount, const int colCount, const int Low, const int High, int rowNo)
+{
+    CreateRow(a, rowNo, colCount, Low, High, 0);
+    if (rowNo < rowCount - 1)
+        CreateRows(a, rowCount, colCount, Low, High, rowNo + 1);
+}
+
+int ProductOfNonNegativeRowsHelper(int** a, const int rowNo, const int colCount, int colNo)
+{
+    if (colNo < colCount)
+    {
+        if (a[rowNo][colNo] >= 0)
+        {
+            return a[rowNo][colNo] * ProductOfNonNegativeRowsHelper(a, rowNo, colCount, colNo + 1);
+        }
+        else
+        {
+            return ProductOfNonNegativeRowsHelper(a, rowNo, colCount, colNo + 1);
+        }
+    }
+    else
+    {
+        return 1; 
+    }
+}
+
+int ProductOfNonNegativeRows(int** a, const int rowCount, const int colCount, int rowNo)
+{
+    if (rowNo < rowCount)
+    {
+        int productForRow = ProductOfNonNegativeRowsHelper(a, rowNo, colCount, 0);
+        cout << "Product of non-negative elements in row " << rowNo << ": " << productForRow << endl;
+        return productForRow * ProductOfNonNegativeRows(a, rowCount, colCount, rowNo + 1);
+    }
+    else
+    {
+        return 1; 
+    }
+}
+
+int RecursiveDiagonalSum(int** a, int row, int col, const int rowCount, const int colCount)
+{
+    
+    if (row >= rowCount || col >= colCount)
+        return 0;
+
+  
+    int sum = a[row][col] + RecursiveDiagonalSum(a, row + 1, col + 1, rowCount, colCount);
+
+    return sum;
+}
+
+void RecursiveFindMaxSumDiagonal(int** a, int row, int col, const int rowCount, const int colCount, int& maxSum)
+{
+   
+    if (row >= rowCount)
+        return;
+
+    
+    int currentSum = RecursiveDiagonalSum(a, row, col, rowCount, colCount);
+
+    
+    maxSum = max(maxSum, currentSum);
+
+    
+    RecursiveFindMaxSumDiagonal(a, row + 1, 0, rowCount, colCount, maxSum);
+}
+
+void RecursiveMaxSumDiagonal(int** a, const int rowCount, const int colCount)
+{
+    int maxSum = INT_MIN;
+
+ 
+    RecursiveFindMaxSumDiagonal(a, 0, 0, rowCount, colCount, maxSum);
+
+    cout << "Max sum of diagonals: " << maxSum << endl;
+}
+
+int main()
+{
+    srand((unsigned)time(NULL));
+    int Low = -7;
+    int High = 7;
+    int rowCount, colCount;
+    cout << "rowCount = "; cin >> rowCount;
+    cout << "colCount = "; cin >> colCount;
+    int** a = new int* [rowCount];
+    for (int i = 0; i < rowCount; i++)
+        a[i] = new int[colCount];
+
+ 
+    InputRows(a, rowCount, colCount, 0);
+    PrintRows(a, rowCount, colCount, 0);
+
+   
+    int product = ProductOfNonNegativeRows(a, rowCount, colCount, 0);
+    cout << "Product of rows without negative elements: " << product << endl;
+
+   
+    RecursiveMaxSumDiagonal(a, rowCount, colCount);
+
+    for (int i = 0; i < rowCount; i++)
+        delete[] a[i];
+    delete[] a;
+
+    return 0;
+}
