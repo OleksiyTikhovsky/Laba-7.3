@@ -1,0 +1,144 @@
+// Lab_7_3.cpp
+// Тиховський Олексій
+// Лабораторна робота № 7.3.
+// Опрацювання динамічних багатовимірних масивів. Рекурсивний спосіб.
+// Варіант 24
+#include <iostream>
+#include <iomanip>
+#include <time.h>
+using namespace std;
+
+void PrintRow(int** a, const int rowNo, const int colCount, int colNo)
+{
+	cout << setw(4) << a[rowNo][colNo];
+	if (colNo < colCount - 1)
+		PrintRow(a, rowNo, colCount, colNo + 1);
+	else
+		cout << endl;
+}
+void PrintRows(int** a, const int rowCount, const int colCount, int rowNo)
+{
+	PrintRow(a, rowNo, colCount, 0);
+	if (rowNo < rowCount - 1)
+		PrintRows(a, rowCount, colCount, rowNo + 1);
+	else
+		cout << endl;
+}
+
+void InputRow(int** a, const int rowNo, const int colCount, int colNo)
+{
+	cout << "a[" << rowNo << "][" << colNo << "] = ";
+	cin >> a[rowNo][colNo];
+	if (colNo < colCount - 1)
+		InputRow(a, rowNo, colCount, colNo + 1);
+	else
+		cout << endl;
+}
+
+void InputRows(int** a, const int rowCount, const int colCount, int rowNo)
+{
+	InputRow(a, rowNo, colCount, 0);
+	if (rowNo < rowCount - 1)
+		InputRows(a, rowCount, colCount, rowNo + 1);
+	else
+		cout << endl;
+}
+
+void CreateRow(int** a, const int rowNo, const int colCount,
+	const int Low, const int High, int colNo)
+{
+	a[rowNo][colNo] = Low + rand() % (High - Low + 1);
+	if (colNo < colCount - 1)
+		CreateRow(a, rowNo, colCount, Low, High, colNo + 1);
+}
+void CreateRows(int** a, const int rowCount, const int colCount,
+	const int Low, const int High, int rowNo)
+{
+	CreateRow(a, rowNo, colCount, Low, High, 0);
+	if (rowNo < rowCount - 1)
+		CreateRows(a, rowCount, colCount, Low, High, rowNo + 1);
+}
+
+int ProductOfNonNegativeRows(int** a, const int rowCount, const int colCount)
+{
+	int product = 1;
+
+	for (int i = 0; i < rowCount; ++i)
+	{
+		bool hasNegative = false;
+		for (int j = 0; j < colCount; ++j)
+		{
+			if (a[i][j] < 0)
+			{
+				hasNegative = true;
+				break;
+			}
+		}
+
+		if (!hasNegative)
+		{
+			for (int j = 0; j < colCount; ++j)
+			{
+				product *= a[i][j];
+			}
+		}
+	}
+
+	return product;
+}
+void FindMaxSumDiagonal(int** a, const int rowCount, const int colCount)
+{
+	int maxSum = INT_MIN;
+
+	// Визначаємо кількість діагоналей
+	int numDiagonals = rowCount + colCount - 1;
+
+	for (int d = 0; d < numDiagonals; ++d)
+	{
+		int sum = 0;
+
+		// Обчислюємо суму елементів на поточній діагоналі
+		for (int i = max(0, d - rowCount + 1); i <= min(d, rowCount - 1); ++i)
+		{
+			int j = d - i;
+			sum += a[i][j];
+		}
+
+		// Оновлюємо максимум, якщо поточна сума більша
+		if (sum > maxSum)
+		{
+			maxSum = sum;
+		}
+	}
+
+	cout << "Max sum of diagonals: " << maxSum << endl;
+}
+
+int main()
+{
+	srand((unsigned)time(NULL));
+	int Low = -7;
+	int High = 7;
+	int rowCount, colCount;
+	cout << "rowCount = "; cin >> rowCount;
+	cout << "colCount = "; cin >> colCount;
+	int** a = new int* [rowCount];
+	for (int i = 0; i < rowCount; i++)
+		a[i] = new int[colCount];
+
+	// CreateRows(a, rowCount, colCount, Low, High, 0);
+	InputRows(a, rowCount, colCount, 0);
+	PrintRows(a, rowCount, colCount, 0);
+
+	// Виклик функції для добутку елементів у рядках без від'ємних елементів
+	int product = ProductOfNonNegativeRows(a, rowCount, colCount);
+	cout << "Product of rows without negative elements: " << product << endl;
+
+	// Виклик функції для знаходження максимуму серед сум діагоналей
+	FindMaxSumDiagonal(a, rowCount, colCount);
+
+	for (int i = 0; i < rowCount; i++)
+		delete[] a[i];
+	delete[] a;
+
+	return 0;
